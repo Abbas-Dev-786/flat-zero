@@ -69,6 +69,18 @@ export function LeveragePanel({ data, isLoading }: LeveragePanelProps) {
             <p className="text-sm text-gray-300">
               {data.marketComparablesSummary || "Insufficient comparable data in this area. Will rely on direct value propositions."}
             </p>
+            {data.comparableRents.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2">
+                {data.comparableRents.slice(0, 5).map((rent, index) => (
+                  <span
+                    key={`${rent}-${index}`}
+                    className="rounded-full border border-white/10 bg-black/20 px-2.5 py-1 text-xs text-gray-200"
+                  >
+                    {rent}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
           <div className="bg-white/5 rounded-xl p-4 border border-white/5">
             <h4 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 flex items-center gap-2">

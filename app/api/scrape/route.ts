@@ -24,9 +24,7 @@ function buildComparableSummary(
   location: string,
   askingRent?: string | null,
 ) {
-  const rents = results
-    .map((result) => rentToNumber(extractRentFromText(getSearchResultText(result))))
-    .filter((rent): rent is number => rent !== null);
+  const rents = extractComparableRents(results);
 
   const summaryLines = summarizeSearchResults(results, 3);
 
@@ -51,6 +49,12 @@ function buildComparableSummary(
   return `Comparable listings near ${location} suggest a typical rent around ${averageRent}.${comparisonNote}${
     summaryLines ? `\n${summaryLines}` : ''
   }`;
+}
+
+function extractComparableRents(results: FirecrawlSearchResult[]) {
+  return results
+    .map((result) => rentToNumber(extractRentFromText(getSearchResultText(result))))
+    .filter((rent): rent is number => rent !== null);
 }
 
 function buildReputationSummary(results: FirecrawlSearchResult[]) {
@@ -148,12 +152,14 @@ export async function POST(request: Request) {
       body.location,
       body.askingRent,
     );
+    const comparableRents = extractComparableRents(comparables);
     const landlordReputationSummary = buildReputationSummary(reputationResults);
 
     const leverageData: LeverageData = {
       listingMarkdown,
       landlordReputationSummary,
       marketComparablesSummary,
+      comparableRents,
       negotiationPoints: buildNegotiationPoints({
         askingRent: body.askingRent,
         comparableSummary: marketComparablesSummary,

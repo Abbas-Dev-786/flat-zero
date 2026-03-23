@@ -21,6 +21,7 @@ export default function ProspectPage({ params }: PageProps) {
   const router = useRouter();
 
   const currentSession = useAppStore((state) => state.currentSession);
+  const searchCriteria = useAppStore((state) => state.searchCriteria);
   const userQuestions = useAppStore((state) => state.userQuestions);
   const isScrapingDetails = useAppStore((state) => state.isScrapingDetails);
   const setIsScrapingDetails = useAppStore((state) => state.setIsScrapingDetails);
@@ -147,6 +148,8 @@ export default function ProspectPage({ params }: PageProps) {
             leverageData?.listingMarkdown || `${listing.title}\n${listing.description}`,
           leveragePoints: leverageData?.negotiationPoints ?? [],
           userQuestions: userQuestions.filter((question) => question.trim()),
+          comparableRents: leverageData?.comparableRents ?? [],
+          preferences: searchCriteria?.preferences ?? [],
         }),
       });
 

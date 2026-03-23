@@ -37,6 +37,7 @@ export interface LeverageData {
   listingMarkdown: string;
   landlordReputationSummary: string | null;
   marketComparablesSummary: string | null;
+  comparableRents: number[];
   negotiationPoints: string[];
   contactPhone: string | null;
 }
