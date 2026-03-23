@@ -6,7 +6,7 @@ import type { SearchPreference } from '@/lib/types';
 type CallRequest = {
   toPhoneNumber?: string;
   propertyAddress?: string;
-  askingRent?: string;
+  askingRent?: string | null;
   listingDetails?: string;
   leveragePoints?: string[];
   userQuestions?: string[];
@@ -21,7 +21,6 @@ export async function POST(request: Request) {
     if (
       !body?.toPhoneNumber ||
       !body.propertyAddress ||
-      !body.askingRent ||
       !body.listingDetails ||
       !Array.isArray(body.leveragePoints) ||
       !Array.isArray(body.userQuestions) ||
@@ -34,21 +33,12 @@ export async function POST(request: Request) {
       );
     }
 
-    const listingPrice = rentToNumber(body.askingRent);
-
-    if (!listingPrice) {
-      return NextResponse.json(
-        {
-          error:
-            'Unable to determine the listing price for negotiation. Please ensure the asking rent is available before calling.',
-        },
-        { status: 400 },
-      );
-    }
+    const listingPrice = rentToNumber(body.askingRent ?? null);
 
     const callResult = await createOutboundCall({
       toPhoneNumber: body.toPhoneNumber,
       propertyAddress: body.propertyAddress,
+      askingRentText: body.askingRent ?? null,
       listingPrice,
       comparables: body.comparableRents,
       listingDetails: body.listingDetails,

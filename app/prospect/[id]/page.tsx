@@ -143,7 +143,7 @@ export default function ProspectPage({ params }: PageProps) {
         body: JSON.stringify({
           toPhoneNumber: phoneNumber,
           propertyAddress: `${listing.title}, ${listing.location}`,
-          askingRent: listing.rent ?? 'Price on request',
+          askingRent: listing.rent ?? null,
           listingDetails:
             leverageData?.listingMarkdown || `${listing.title}\n${listing.description}`,
           leveragePoints: leverageData?.negotiationPoints ?? [],
