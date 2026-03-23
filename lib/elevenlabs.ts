@@ -64,8 +64,8 @@ export type ElevenLabsConversation = {
 };
 
 const PRESSURE_PHRASES = [
-  "I’m ready to move quickly",
-  "I’ve seen better options nearby",
+  "I'm ready to move quickly",
+  "I've seen better options nearby",
   "I can finalize today if we agree",
 ];
 
@@ -75,11 +75,35 @@ const NO_COMPARABLES_SUMMARY =
 const NO_PRICING_CONTEXT_SUMMARY =
   "Reliable pricing context is unavailable for this call, so focus on availability, terms, and next steps.";
 
-function clipText(value: string, limit = 5000) {
-  if (value.length <= limit) {
-    return value;
+// ─── Comparables plausibility guard ───────────────────────────────────────────
+// If the average comparable is below MIN_COMPARABLE_RATIO of the listing price,
+// or above MAX_COMPARABLE_RATIO, the comparables are from a different market tier
+// and should be discarded rather than used to make embarrassing price proposals.
+const MIN_COMPARABLE_RATIO = 0.4; // avg must be at least 40% of listing price
+const MAX_COMPARABLE_RATIO = 2.5; // avg must be no more than 250% of listing price
+
+function filterPlausibleComparables(
+  comparables: number[],
+  listingPrice: number | null,
+): number[] {
+  const usable = comparables.filter((v) => Number.isFinite(v) && v > 0);
+  if (!hasValidPrice(listingPrice) || usable.length === 0) return usable;
+
+  const avg = usable.reduce((a, b) => a + b, 0) / usable.length;
+  const ratio = avg / listingPrice!;
+
+  if (ratio < MIN_COMPARABLE_RATIO || ratio > MAX_COMPARABLE_RATIO) {
+    // The scraped comparables are from a completely different price tier.
+    // Return empty so the strategy falls back to info-only or listing-only mode.
+    return [];
   }
 
+  return usable;
+}
+// ──────────────────────────────────────────────────────────────────────────────
+
+function clipText(value: string, limit = 5000) {
+  if (value.length <= limit) return value;
   return `${value.slice(0, limit).trimEnd()}\n\n[Listing details truncated for length]`;
 }
 
@@ -87,15 +111,10 @@ function formatPreference(preference: SearchPreference) {
   if (typeof preference.value === "boolean") {
     return preference.value ? preference.label : `${preference.label}: no`;
   }
-
   if (Array.isArray(preference.value)) {
     return `${preference.label}: ${preference.value.join(", ")}`;
   }
-
-  if (preference.value === null) {
-    return preference.label;
-  }
-
+  if (preference.value === null) return preference.label;
   return `${preference.label}: ${preference.value}`;
 }
 
@@ -105,27 +124,17 @@ function hasValidPrice(value: number | null | undefined): value is number {
 
 function detectPriceQualifier(value: string) {
   const normalized = value.toLowerCase();
-
-  if (normalized.includes("pcm")) {
-    return " pcm";
-  }
-
-  if (normalized.includes("/month") || normalized.includes("/mo")) {
+  if (normalized.includes("pcm")) return " pcm";
+  if (normalized.includes("/month") || normalized.includes("/mo"))
     return " /month";
-  }
-
-  if (normalized.includes("per month") || normalized.includes("monthly")) {
+  if (normalized.includes("per month") || normalized.includes("monthly"))
     return " per month";
-  }
-
   if (
     normalized.includes("pw") ||
     normalized.includes("per week") ||
     normalized.includes("/week")
-  ) {
+  )
     return " per week";
-  }
-
   return "";
 }
 
@@ -133,39 +142,27 @@ function detectPriceFormatting(
   value: string | null | undefined,
 ): PriceFormatting {
   const normalized = value?.trim() ?? "";
-
-  if (!normalized) {
-    return { currencySymbol: null, priceQualifier: "" };
-  }
-
-  if (normalized.includes("₹") || /\bINR\b/i.test(normalized)) {
+  if (!normalized) return { currencySymbol: null, priceQualifier: "" };
+  if (normalized.includes("₹") || /\bINR\b/i.test(normalized))
     return {
       currencySymbol: "₹",
       priceQualifier: detectPriceQualifier(normalized),
     };
-  }
-
-  if (normalized.includes("£") || /\bGBP\b/i.test(normalized)) {
+  if (normalized.includes("£") || /\bGBP\b/i.test(normalized))
     return {
       currencySymbol: "£",
       priceQualifier: detectPriceQualifier(normalized),
     };
-  }
-
-  if (normalized.includes("€") || /\bEUR\b/i.test(normalized)) {
+  if (normalized.includes("€") || /\bEUR\b/i.test(normalized))
     return {
       currencySymbol: "€",
       priceQualifier: detectPriceQualifier(normalized),
     };
-  }
-
-  if (normalized.includes("$")) {
+  if (normalized.includes("$"))
     return {
       currencySymbol: "$",
       priceQualifier: detectPriceQualifier(normalized),
     };
-  }
-
   return {
     currencySymbol: null,
     priceQualifier: detectPriceQualifier(normalized),
@@ -173,14 +170,10 @@ function detectPriceFormatting(
 }
 
 function formatPrice(value: number | null, formatting: PriceFormatting) {
-  if (!hasValidPrice(value)) {
-    return "unavailable";
-  }
-
+  if (!hasValidPrice(value)) return "unavailable";
   const amount = new Intl.NumberFormat("en-US", {
     maximumFractionDigits: 0,
   }).format(Math.round(value));
-
   return `${formatting.currencySymbol ?? ""}${amount}${formatting.priceQualifier}`.trim();
 }
 
@@ -193,10 +186,7 @@ export function buildComparablesSummary(
   formatting: PriceFormatting,
 ) {
   const usableComparables = getUsableComparables(comparables);
-
-  if (usableComparables.length === 0) {
-    return null;
-  }
+  if (usableComparables.length === 0) return null;
 
   const min = Math.min(...usableComparables);
   const max = Math.max(...usableComparables);
@@ -207,14 +197,17 @@ export function buildComparablesSummary(
   if (usableComparables.length === 1) {
     return `A similar nearby listing is priced around ${formatPrice(min, formatting)}.`;
   }
-
   return `Similar flats nearby are priced between ${formatPrice(min, formatting)} and ${formatPrice(max, formatting)}, averaging ${formatPrice(avg, formatting)}.`;
 }
 
 export function computeNegotiationStrategy(
   listingPrice: number | null,
-  comparables: number[],
+  rawComparables: number[],
 ): NegotiationStrategy {
+  // ── Sanity-check comparables against listing price before using them ──
+  const comparables = filterPlausibleComparables(rawComparables, listingPrice);
+  // ─────────────────────────────────────────────────────────────────────
+
   const usableComparables = getUsableComparables(comparables);
   const avg =
     usableComparables.length > 0
@@ -357,10 +350,9 @@ export function buildFirstMessage(
   strategy: NegotiationStrategy,
 ) {
   if (strategy.hasComparableStory) {
-    return `Hi, I’m calling about your listing at ${vars.property_address}… I’ve seen a few similar places nearby and wanted to quickly check something about the pricing… is now a good time to talk?`;
+    return `Hi, I'm calling about your listing at ${vars.property_address}… I've seen a few similar places nearby and wanted to quickly check something about the pricing… is now a good time to talk?`;
   }
-
-  return `Hi, I’m calling about your listing at ${vars.property_address}… I had a couple of quick questions about availability and next steps… is now a good time to talk?`;
+  return `Hi, I'm calling about your listing at ${vars.property_address}… I had a couple of quick questions about availability and next steps… is now a good time to talk?`;
 }
 
 export function buildAgentPrompt({
@@ -391,24 +383,24 @@ export function buildAgentPrompt({
         "- Pricing posture: {{pricing_posture}}",
         "- Current asking rent: {{listing_price}}",
         "- Market context: {{comparables_summary}}",
-        "- Start the negotiation around {{anchor_price}}.",
-        "- Work toward {{target_price}}.",
-        "- Do not accept anything above {{max_price}}. Instead, state that you will need to confirm the higher price with your client.",
-        "- Attempt negotiation, but if the landlord is firm and provides a final offer, accept their position gracefully without pressing further.",
-        "- If the landlord resists initially, acknowledge the concern calmly, restate the market comparison briefly, offer a quick-close incentive, and move upward gradually toward the target.",
-        "- Do not dump numbers mechanically. Use a short, natural market story instead of sounding analytical, robotic, or overly aggressive.",
+        "- Open the negotiation around {{anchor_price}}.",
+        "- Work toward a target of {{target_price}}.",
+        "- Your absolute ceiling is {{max_price}}. If the landlord's final offer exceeds this, do NOT accept. Instead say you will check with your client and close the call.",
+        "- State your comparable figure ONCE. After that, refer to it only as 'the local market data' or 'what we discussed'. Never repeat the exact number again.",
+        "- If the landlord is firm and repeats their price, or says anything like 'final offer', 'take it or leave it', or 'that is my last price' — accept their position immediately, confirm next steps, and close within one or two exchanges. Do not argue further.",
+        "- Do not dump numbers mechanically. Weave the market story into natural conversation.",
       ]
     : [
         "Pricing strategy for this call:",
         "- Reliable pricing context is unavailable.",
-        "- Do not invent market comparisons, target prices, or discount numbers.",
+        "- Do NOT invent market comparisons, target prices, or discount numbers.",
         "- Focus on confirming availability, terms, fees, and whether a viewing can be arranged.",
       ];
 
   return [
-    "You are Alex, a highly competent and strategic rental negotiation agent representing a prospective tenant.",
+    "You are Alex, a highly competent rental negotiation agent representing a prospective tenant.",
     "Your primary goal is to reduce the rent and secure favorable terms for your client.",
-    "Secondary goals are to gather missing information, confirm details, and secure next steps if a deal is not finalized today.",
+    "Secondary goals are to gather missing information, confirm details, and secure a clear next step.",
     "",
     "Property: {{property_address}}",
     "Current asking rent: {{listing_price}}",
@@ -421,37 +413,33 @@ export function buildAgentPrompt({
     "Client preferences:",
     "{{preferences}}",
     "",
-    "Useful pressure phrases to weave in naturally:",
+    "Useful pressure phrases to weave in naturally (use sparingly, never mechanically):",
     "{{pressure_phrases}}",
     "",
+    "CRITICAL conversation rules — these override everything else:",
+    "- Match the landlord's energy. If they give a short answer, respond in ONE or TWO sentences maximum. Never deliver a long monologue in response to a one-word reply.",
+    "- Ask ONE question at a time. Never stack multiple questions in a single turn.",
+    "- Never repeat a phrase, sentence, or number you have already said. Use different wording each time.",
+    "- If the landlord repeats their price twice, or uses language indicating finality ('final offer', 'take it or leave it', 'that is my last'), immediately accept their position gracefully, confirm you will relay the information to your client, thank them, and end the call within two turns. Do not push again.",
+    "- If there is silence or no response, say a brief, natural goodbye and end the call immediately. Never ask 'Are you still there?' or any variation of it. If you said goodbye and the person still does not respond, hang up silently.",
+    "- Never say you are an AI. Never break character. Never hallucinate facts.",
+    "- Once you have said goodbye, stop talking entirely.",
+    "",
     "Conversation flow:",
-    "1. Introduce yourself naturally and confirm the property.",
-    "2. Ask any missing information briefly.",
-    "3. Show strong interest and communicate readiness to move quickly.",
-    "4. If pricing context exists, introduce the rent discussion naturally and negotiate with facts.",
-    "5. Push for agreement or secure a clear next step before ending the call.",
-    "6. If the landlord provides a final, firm price that exceeds your max acceptable price, accept their position gracefully, do not argue further, and prepare to wrap up the call.",
-    "7. Once the conversation is concluded, say goodbye politely and stop talking so the call can end.",
+    "1. Introduce yourself, confirm the property is still available, and ask ONE opening question.",
+    "2. Work through the tenant's questions ONE AT A TIME across multiple turns.",
+    "3. Show strong interest and readiness to move quickly.",
+    "4. If pricing context exists, introduce the rent discussion naturally after confirming availability. State your comparable figure once.",
+    "5. Push for agreement or secure a viewing/next step before ending the call.",
+    "6. Once agreement or impasse is reached, close the call politely and stop talking.",
     "",
-    "Guardrails:",
-    "- Never say you are an AI.",
-    "- Never break character.",
-    "- Never hallucinate facts.",
-    "- Keep responses short, natural, and conversational. Do not be overly pushy, repetitive, or aggressive.",
-    '- If the person gives a short or firm answer (like "No"), respect it. Do not deliver a long monologue in response.',
-    "- If you are unsure, ask a question instead of guessing.",
-    '- If you cannot answer something, or if the landlord is firm on a high price, state naturally that you will consult with your client (e.g., "I will run those numbers by my client and get back to you").',
-    "- Never repeat the exact same phrase multiple times. Use natural variations.",
-    '- Once you have reached an impasse or agreed on next steps, end the call gracefully. Never keep asking "Are you still there?".',
-    "- Do not claim to have market data beyond what is included in this prompt.",
-    "",
-    "Tenant questions to cover naturally:",
+    "Tenant questions to cover (one per turn, naturally worked into the conversation):",
     formattedQuestions,
     "",
     "Additional research notes for context:",
     formattedResearchNotes,
     "",
-    "Property listing details and research context:",
+    "Property listing details:",
     clipText(listingDetails),
   ].join("\n");
 }
@@ -513,7 +501,6 @@ export async function createOutboundCall(params: OutboundCallParams) {
       response.status === 422
         ? " Make sure prompt and first-message overrides are enabled for the agent in ElevenLabs."
         : "";
-
     throw new Error(
       `Failed to create outbound call: ${response.status} ${errorText}${overrideHint}`,
     );
@@ -529,18 +516,13 @@ export async function createOutboundCall(params: OutboundCallParams) {
 
 export async function getConversationStatus(conversationId: string) {
   const apiKey = process.env.ELEVENLABS_API_KEY;
-
-  if (!apiKey) {
-    throw new Error("ELEVENLABS_API_KEY is not set");
-  }
+  if (!apiKey) throw new Error("ELEVENLABS_API_KEY is not set");
 
   const response = await fetch(
     `https://api.elevenlabs.io/v1/convai/conversations/${conversationId}`,
     {
       method: "GET",
-      headers: {
-        "xi-api-key": apiKey,
-      },
+      headers: { "xi-api-key": apiKey },
     },
   );
 
