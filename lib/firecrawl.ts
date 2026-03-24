@@ -154,14 +154,21 @@ function firstValidImage(images?: string[], ogImage?: string) {
   return null;
 }
 
-export async function searchListings(query: string, limit = 10) {
-  const result = await getClient().search(query, {
+export async function searchListings(query: string, location?: string | null, limit = 10) {
+  const searchOptions: any = {
     limit,
+    tbs: 'qdr:w',
     scrapeOptions: {
       formats: ['markdown', listingExtractionFormat],
       onlyMainContent: true,
     },
-  });
+  };
+
+  if (location) {
+    searchOptions.location = location;
+  }
+
+  const result = await getClient().search(query, searchOptions);
 
   return result.web ?? [];
 }

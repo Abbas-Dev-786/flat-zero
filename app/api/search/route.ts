@@ -33,10 +33,6 @@ function buildSearchQuery({
   const parts = [normalizedQuery];
   const lowered = normalizedQuery.toLowerCase();
 
-  if (location && !lowered.includes(location.toLowerCase())) {
-    parts.push(location);
-  }
-
   if (maxBudget && !/\b(?:under|below|max|budget)\b/i.test(normalizedQuery)) {
     parts.push(`under ${maxBudget}`);
   }
@@ -126,7 +122,7 @@ export async function POST(request: Request) {
     }
 
     const finalQuery = buildSearchQuery(criteria);
-    const rawResults = await searchListings(finalQuery, 10);
+    const rawResults = await searchListings(finalQuery, criteria.location, 10);
     const listings = rawResults
       .map((result) => normalizeListing(result, criteria.location))
       .filter((listing): listing is Listing => listing !== null);
