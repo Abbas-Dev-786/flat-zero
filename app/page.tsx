@@ -8,47 +8,15 @@ import { parseSearchCriteriaFromQuery } from '@/lib/search-preferences';
 export default function SearchPage() {
   const router = useRouter();
   const [query, setQuery] = useState('');
-  const [errorText, setErrorText] = useState('');
-  
-  const setSearchCriteria = useAppStore(state => state.setSearchCriteria);
-  const setListings = useAppStore(state => state.setListings);
-  const setIsSearching = useAppStore(state => state.setIsSearching);
+  const beginSearch = useAppStore(state => state.beginSearch);
   const isSearching = useAppStore(state => state.isSearching);
 
   const submitSearch = async () => {
     if (!query.trim()) return;
 
-    setErrorText('');
-    setIsSearching(true);
-
     const criteria = parseSearchCriteriaFromQuery(query);
-
-    setSearchCriteria(criteria);
-
-    try {
-      const res = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(criteria),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Search failed');
-      }
-
-      const data = await res.json();
-      setListings(data.listings);
-      router.push('/results');
-    } catch (error) {
-      setErrorText(
-        error instanceof Error
-          ? error.message
-          : 'An unexpected error occurred while searching.',
-      );
-    } finally {
-      setIsSearching(false);
-    }
+    beginSearch(criteria);
+    router.push('/results');
   };
 
   const handleSearch = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -117,11 +85,6 @@ export default function SearchPage() {
           </p>
         )}
         
-        {errorText && (
-          <div className="mt-4 p-4 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
-            {errorText}
-          </div>
-        )}
       </div>
     </main>
   );

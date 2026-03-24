@@ -1,115 +1,15 @@
-import { createHash } from 'crypto';
 import { NextResponse } from 'next/server';
 import {
-  buildListingPatchFromExtraction,
-  extractAvailableFromText,
-  extractBathroomsFromText,
-  extractBedroomsFromText,
-  extractPhoneNumber,
-  extractRentFromText,
-  getSearchResultImage,
-  getSearchResultText,
-  getSearchResultTitle,
-  getSearchResultUrl,
-  getListingExtraction,
-  getSourceSite,
-  searchListings,
-  toPlainTextSnippet,
+  DEFAULT_ENRICHED_LISTING_TARGET,
+  discoverCanonicalListings,
 } from '@/lib/firecrawl';
-import type { Listing, SearchCriteria } from '@/lib/types';
-import {
-  normalizeSearchCriteria,
-  preferenceToQueryText,
-} from '@/lib/search-preferences';
+import type { SearchCriteria, SearchStreamEvent } from '@/lib/types';
+import { normalizeSearchCriteria } from '@/lib/search-preferences';
 
-function buildSearchQuery({
-  query,
-  location,
-  maxBudget,
-  bedrooms,
-  preferences,
-}: SearchCriteria) {
-  const normalizedQuery = query.trim();
-  const parts = [normalizedQuery];
-  const lowered = normalizedQuery.toLowerCase();
+const encoder = new TextEncoder();
 
-  if (maxBudget && !/\b(?:under|below|max|budget)\b/i.test(normalizedQuery)) {
-    parts.push(`under ${maxBudget}`);
-  }
-
-  if (bedrooms && !/\b\d+\s*(?:bed|bedroom|br)\b/i.test(normalizedQuery)) {
-    parts.push(`${bedrooms} bedroom`);
-  }
-
-  if (!/\b(?:apartment|flat|condo|home|rental|rent)\b/i.test(normalizedQuery)) {
-    parts.push('apartment rental listing');
-  }
-
-  for (const preference of preferences) {
-    const preferenceText = preferenceToQueryText(preference).trim();
-    if (preferenceText && !lowered.includes(preferenceText.toLowerCase())) {
-      parts.push(preferenceText);
-    }
-  }
-
-  return parts.join(' ');
-}
-
-function createListingId(url: string) {
-  return createHash('sha1').update(url).digest('hex');
-}
-
-function inferPetPolicy(text: string) {
-  if (!text) {
-    return null;
-  }
-
-  if (/\b(?:pet-friendly|pets allowed|cats allowed|dogs allowed)\b/i.test(text)) {
-    return 'Pet-friendly';
-  }
-
-  if (/\bno pets\b/i.test(text)) {
-    return 'No pets';
-  }
-
-  if (/\bpet\b/i.test(text)) {
-    return 'Ask landlord';
-  }
-
-  return null;
-}
-
-function normalizeListing(rawResult: Awaited<ReturnType<typeof searchListings>>[number], fallbackLocation?: string): Listing | null {
-  const url = getSearchResultUrl(rawResult);
-  if (!url) {
-    return null;
-  }
-
-  const extracted = getListingExtraction(rawResult);
-  const extractedPatch = buildListingPatchFromExtraction(extracted);
-  const text = getSearchResultText(rawResult);
-
-  const rent = extractedPatch.rent ?? extractRentFromText(text);
-  const contactPhone = extractedPatch.contactPhone ?? extractPhoneNumber(text);
-  const title = extractedPatch.title ?? getSearchResultTitle(rawResult) ?? 'Untitled listing';
-  const location = extractedPatch.location ?? fallbackLocation ?? 'Location unavailable';
-
-  return {
-    id: createListingId(url),
-    title,
-    rent,
-    location,
-    bedrooms: extractedPatch.bedrooms ?? extractBedroomsFromText(text),
-    bathrooms: extractedPatch.bathrooms ?? extractBathroomsFromText(text),
-    petPolicy: extractedPatch.petPolicy ?? inferPetPolicy(text),
-    availableFrom: extractedPatch.availableFrom ?? extractAvailableFromText(text),
-    listingUrl: url,
-    thumbnailUrl: extractedPatch.thumbnailUrl ?? getSearchResultImage(rawResult),
-    contactPhone,
-    description: toPlainTextSnippet(text, 260),
-    sourceSite: getSourceSite(url),
-    attributes: extractedPatch.attributes ?? {},
-  };
+function encodeEvent(event: SearchStreamEvent) {
+  return encoder.encode(`${JSON.stringify(event)}\n`);
 }
 
 export async function POST(request: Request) {
@@ -121,13 +21,44 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Query is required' }, { status: 400 });
     }
 
-    const finalQuery = buildSearchQuery(criteria);
-    const rawResults = await searchListings(finalQuery, criteria.location, 10);
-    const listings = rawResults
-      .map((result) => normalizeListing(result, criteria.location))
-      .filter((listing): listing is Listing => listing !== null);
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        const send = (event: SearchStreamEvent) => {
+          controller.enqueue(encodeEvent(event));
+        };
 
-    return NextResponse.json({ listings });
+        void (async () => {
+          try {
+            const listings = await discoverCanonicalListings(criteria, {
+              targetCount: DEFAULT_ENRICHED_LISTING_TARGET,
+              onEvent: send,
+            });
+
+            send({
+              type: 'complete',
+              total: listings.length,
+            });
+          } catch (error) {
+            send({
+              type: 'error',
+              error:
+                error instanceof Error
+                  ? error.message
+                  : 'Unable to search listings right now',
+            });
+          } finally {
+            controller.close();
+          }
+        })();
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'application/x-ndjson; charset=utf-8',
+        'Cache-Control': 'no-cache, no-transform',
+      },
+    });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'Unable to search listings right now';

@@ -47,6 +47,9 @@ function mergeListingWithPatch(listing: Listing, patch: ListingPatch) {
 
 interface AppState {
   searchCriteria: SearchCriteria | null;
+  searchRequestId: number;
+  searchStatusMessage: string;
+  searchError: string;
   listings: Listing[];
   isSearching: boolean;
 
@@ -56,9 +59,14 @@ interface AppState {
   currentSession: ProspectSession | null;
 
   // Actions
+  beginSearch: (criteria: SearchCriteria) => void;
   setSearchCriteria: (criteria: SearchCriteria) => void;
   setListings: (listings: Listing[]) => void;
+  appendListing: (listing: Listing) => void;
   setIsSearching: (isSearching: boolean) => void;
+  setSearchStatusMessage: (message: string) => void;
+  setSearchError: (message: string) => void;
+  finishSearch: () => void;
 
   setSelectedListing: (listing: Listing | null) => void;
   setUserQuestions: (questions: string[]) => void;
@@ -73,6 +81,9 @@ interface AppState {
 
 export const useAppStore = create<AppState>((set) => ({
   searchCriteria: null,
+  searchRequestId: 0,
+  searchStatusMessage: '',
+  searchError: '',
   listings: [],
   isSearching: false,
 
@@ -81,9 +92,30 @@ export const useAppStore = create<AppState>((set) => ({
   isScrapingDetails: false,
   currentSession: null,
 
+  beginSearch: (criteria) =>
+    set((state) => ({
+      searchCriteria: criteria,
+      searchRequestId: state.searchRequestId + 1,
+      searchStatusMessage: 'Searching verified rental listing pages...',
+      searchError: '',
+      listings: [],
+      isSearching: true,
+    })),
   setSearchCriteria: (criteria) => set({ searchCriteria: criteria }),
   setListings: (listings) => set({ listings }),
+  appendListing: (listing) =>
+    set((state) => ({
+      listings: state.listings.some(
+        (existing) =>
+          existing.id === listing.id || existing.listingUrl === listing.listingUrl,
+      )
+        ? state.listings
+        : [...state.listings, listing],
+    })),
   setIsSearching: (isSearching) => set({ isSearching }),
+  setSearchStatusMessage: (searchStatusMessage) => set({ searchStatusMessage }),
+  setSearchError: (searchError) => set({ searchError }),
+  finishSearch: () => set({ isSearching: false }),
 
   setSelectedListing: (listing) => set({ selectedListing: listing }),
   setUserQuestions: (questions) =>
@@ -152,6 +184,9 @@ export const useAppStore = create<AppState>((set) => ({
 
   reset: () => set({
     searchCriteria: null,
+    searchRequestId: 0,
+    searchStatusMessage: '',
+    searchError: '',
     listings: [],
     isSearching: false,
     selectedListing: null,

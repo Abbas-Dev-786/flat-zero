@@ -72,6 +72,7 @@ export default function ProspectPage({ params }: PageProps) {
   const isCalling =
     callState.status === 'initiating' || callState.status === 'in-progress';
   const displayableAttributes = getDisplayableAttributes(listing.attributes);
+  const propertyAddress = listing.exactAddress ?? `${listing.title}, ${listing.location}`;
 
   const handleQuestionChange = (index: number, value: string) => {
     const nextQuestions = [...userQuestions];
@@ -93,8 +94,12 @@ export default function ProspectPage({ params }: PageProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           listingUrl: listing.listingUrl,
+          listingTitle: listing.title,
           location: listing.location,
+          exactAddress: listing.exactAddress,
+          managerName: listing.managerName,
           askingRent: listing.rent,
+          bedrooms: listing.bedrooms,
         }),
       });
 
@@ -142,10 +147,18 @@ export default function ProspectPage({ params }: PageProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           toPhoneNumber: phoneNumber,
-          propertyAddress: `${listing.title}, ${listing.location}`,
+          propertyAddress,
           askingRent: listing.rent ?? null,
           listingDetails:
-            leverageData?.listingMarkdown || `${listing.title}\n${listing.description}`,
+            leverageData?.listingMarkdown ||
+            [
+              listing.title,
+              propertyAddress,
+              leverageData?.dossier?.overview,
+              listing.description,
+            ]
+              .filter(Boolean)
+              .join('\n'),
           leveragePoints: leverageData?.negotiationPoints ?? [],
           userQuestions: userQuestions.filter((question) => question.trim()),
           comparableRents: leverageData?.comparableRents ?? [],
@@ -211,7 +224,9 @@ export default function ProspectPage({ params }: PageProps) {
                     <h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
                       {listing.title}
                     </h1>
-                    <p className="mt-2 text-base text-gray-300">{listing.location}</p>
+                    <p className="mt-2 text-base text-gray-300">
+                      {listing.exactAddress ?? listing.location}
+                    </p>
                   </div>
                   <div className="rounded-2xl border border-blue-400/20 bg-blue-500/10 px-4 py-3 text-right">
                     <p className="text-xs uppercase tracking-[0.2em] text-blue-200/80">
@@ -242,6 +257,11 @@ export default function ProspectPage({ params }: PageProps) {
                   <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
                     via {listing.sourceSite}
                   </span>
+                  {listing.managerName && (
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                      {listing.managerName}
+                    </span>
+                  )}
                 </div>
 
                 {displayableAttributes.length > 0 && (
@@ -272,12 +292,20 @@ export default function ProspectPage({ params }: PageProps) {
                   </p>
                   <div className="mt-4 space-y-3">
                     <p>
+                      <span className="text-gray-500">Exact address:</span>{' '}
+                      {listing.exactAddress ?? 'Using listing location'}
+                    </p>
+                    <p>
                       <span className="text-gray-500">Available from:</span>{' '}
                       {listing.availableFrom ?? 'Ask landlord'}
                     </p>
                     <p>
                       <span className="text-gray-500">Phone:</span>{' '}
                       {listing.contactPhone ?? 'Will scrape or enter manually'}
+                    </p>
+                    <p>
+                      <span className="text-gray-500">Manager:</span>{' '}
+                      {listing.managerName ?? 'Will verify during research'}
                     </p>
                     <a
                       href={listing.listingUrl}

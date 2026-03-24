@@ -5,12 +5,19 @@ interface ListingCardProps {
   title: string;
   rent: string | null;
   location: string;
+  exactAddress: string | null;
   bedrooms: number | null;
   bathrooms: number | null;
   sourceSite: string;
   description: string;
   attributes: Record<string, DynamicValue>;
   thumbnailUrl?: string | null;
+  contactPhone: string | null;
+  managerName: string | null;
+  detailConfidence: number;
+  keyAmenities: string[];
+  verifiedDetailPage: boolean;
+  listingUrl: string;
   onSelect?: () => void;
 }
 
@@ -18,15 +25,28 @@ export function ListingCard({
   title,
   rent,
   location,
+  exactAddress,
   bedrooms,
   bathrooms,
   sourceSite,
   description,
   attributes,
   thumbnailUrl,
+  contactPhone,
+  managerName,
+  detailConfidence,
+  keyAmenities,
+  verifiedDetailPage,
+  listingUrl,
   onSelect,
 }: ListingCardProps) {
-  const attributeBadges = getDisplayableAttributes(attributes).slice(0, 3);
+  const attributeBadges = [
+    ...keyAmenities.map((amenity) => ({
+      key: amenity,
+      displayText: amenity,
+    })),
+    ...getDisplayableAttributes(attributes),
+  ].slice(0, 5);
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md transition-all hover:-translate-y-1 hover:border-blue-500/50 hover:bg-white/10 hover:shadow-2xl hover:shadow-blue-500/20">
@@ -47,8 +67,15 @@ export function ListingCard({
       )}
 
       <div className="p-6 flex-1 flex flex-col">
-        <div className="absolute top-4 right-4 rounded-full bg-black/60 backdrop-blur-md px-3 py-1 text-xs font-semibold text-blue-300 ring-1 ring-inset ring-blue-500/30 shadow-xl z-20">
-          via {sourceSite}
+        <div className="absolute top-4 right-4 z-20 flex items-center gap-2">
+          {verifiedDetailPage && (
+            <span className="rounded-full bg-emerald-500/20 px-3 py-1 text-xs font-semibold text-emerald-200 ring-1 ring-inset ring-emerald-400/30 shadow-xl">
+              Verified page
+            </span>
+          )}
+          <span className="rounded-full bg-black/60 px-3 py-1 text-xs font-semibold text-blue-300 ring-1 ring-inset ring-blue-500/30 shadow-xl backdrop-blur-md">
+            via {sourceSite}
+          </span>
         </div>
         
         <div className="mb-2 text-2xl font-bold tracking-tight text-white flex items-center gap-2">
@@ -57,7 +84,24 @@ export function ListingCard({
         </div>
         
         <h3 className="text-lg font-semibold text-gray-100 line-clamp-1">{title}</h3>
-        <p className="mt-1 text-sm text-gray-400 font-medium">{location}</p>
+        <p className="mt-1 text-sm font-medium text-gray-300">
+          {exactAddress ?? location}
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-gray-400">
+          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+            confidence {(detailConfidence * 100).toFixed(0)}%
+          </span>
+          {managerName && (
+            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+              {managerName}
+            </span>
+          )}
+          {contactPhone && (
+            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+              {contactPhone}
+            </span>
+          )}
+        </div>
         
         <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-gray-300">
           {bedrooms !== null && (
@@ -90,6 +134,19 @@ export function ListingCard({
             ))}
           </div>
         )}
+
+        <a
+          href={listingUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="mt-4 inline-flex items-center gap-2 text-sm text-blue-300 transition-colors hover:text-white"
+        >
+          Open canonical listing
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M7 17 17 7" />
+            <path d="M7 7h10v10" />
+          </svg>
+        </a>
 
         <button
           type="button"

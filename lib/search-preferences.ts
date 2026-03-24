@@ -186,9 +186,9 @@ export function parseSearchCriteriaFromQuery(query: string): SearchCriteria {
   const budgetMatch = normalizedQuery.match(
     /\b(?:under|below|max|budget)\s*[$£€]?\s*(\d[\d,]*)/i,
   );
-  const bedroomsMatch = normalizedQuery.match(/(\d+)\s*(?:bed|bedroom|br)\b/i);
+  const bedroomsMatch = normalizedQuery.match(/(\d+)\s*(?:bed|bedroom|br|bhk)\b/i);
   const locationMatch = normalizedQuery.match(
-    /\bin\s+([a-zA-Z\s.-]+?)(?=\s+(?:under|below|max|budget|\d+\s*(?:bed|bedroom|br)\b)|,|$)/i,
+    /\bin\s+([a-zA-Z\s.-]+?)(?=\s+(?:under|below|max|budget|\d+\s*(?:bed|bedroom|br|bhk)\b)|,|$)/i,
   );
 
   const detectedPreferences = PREFERENCE_PATTERNS.map((pattern) => {

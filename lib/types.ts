@@ -1,5 +1,41 @@
 export type DynamicValue = string | number | boolean | string[] | null;
 
+export type SourceKind =
+  | 'listing'
+  | 'search'
+  | 'agent'
+  | 'comparable'
+  | 'reputation'
+  | 'management'
+  | 'other';
+
+export interface SourceLink {
+  url: string;
+  label: string;
+  kind: SourceKind;
+  note?: string | null;
+}
+
+export interface PropertyFact {
+  label: string;
+  value: string;
+}
+
+export interface PropertyDossier {
+  overview: string | null;
+  exactAddress: string | null;
+  managerName: string | null;
+  contactPhone: string | null;
+  contactEmail: string | null;
+  availability: string | null;
+  leaseTerms: string | null;
+  petPolicy: string | null;
+  keyAmenities: string[];
+  feesAndPolicies: PropertyFact[];
+  notableConcerns: string[];
+  sourceLinks: SourceLink[];
+}
+
 export interface SearchPreference {
   key: string;
   label: string;
@@ -19,13 +55,20 @@ export interface Listing {
   title: string;
   rent: string | null;
   location: string;
+  exactAddress: string | null;
   bedrooms: number | null;
   bathrooms: number | null;
   petPolicy: string | null;
   availableFrom: string | null;
   listingUrl: string;
+  rawSearchUrl: string | null;
   thumbnailUrl: string | null;
   contactPhone: string | null;
+  managerName: string | null;
+  detailConfidence: number;
+  keyAmenities: string[];
+  sourceLinks: SourceLink[];
+  verifiedDetailPage: boolean;
   description: string;
   sourceSite: string;
   attributes: Record<string, DynamicValue>;
@@ -40,7 +83,31 @@ export interface LeverageData {
   comparableRents: number[];
   negotiationPoints: string[];
   contactPhone: string | null;
+  dossier: PropertyDossier | null;
+  sourceLinks: SourceLink[];
 }
+
+export type SearchStreamEvent =
+  | {
+      type: 'status';
+      phase: 'discovering' | 'filtering' | 'scraping' | 'complete';
+      message: string;
+      scanned?: number;
+      accepted?: number;
+      target?: number;
+    }
+  | {
+      type: 'listing';
+      listing: Listing;
+    }
+  | {
+      type: 'complete';
+      total: number;
+    }
+  | {
+      type: 'error';
+      error: string;
+    };
 
 export interface CallState {
   status: 'idle' | 'initiating' | 'in-progress' | 'completed' | 'failed';

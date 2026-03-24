@@ -32,6 +32,8 @@ export function LeveragePanel({ data, isLoading }: LeveragePanelProps) {
 
   if (!data) return null;
 
+  const dossier = data.dossier;
+
   return (
     <div className="w-full rounded-2xl border border-blue-500/20 bg-gradient-to-b from-blue-900/10 to-transparent p-6 backdrop-blur-md shadow-2xl shadow-blue-900/10">
       <div className="flex items-center gap-3 mb-6 pb-4 border-b border-white/10">
@@ -45,6 +47,59 @@ export function LeveragePanel({ data, isLoading }: LeveragePanelProps) {
       </div>
 
       <div className="space-y-6">
+        {dossier && (
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+            <div className="rounded-xl border border-white/5 bg-white/5 p-4">
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-400">
+                Property Dossier
+              </h3>
+              <p className="text-sm leading-6 text-gray-200">
+                {dossier.overview || 'No property overview was verified beyond the listing page.'}
+              </p>
+              {dossier.keyAmenities.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {dossier.keyAmenities.map((amenity) => (
+                    <span
+                      key={amenity}
+                      className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2.5 py-1 text-xs text-cyan-100"
+                    >
+                      {amenity}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-xl border border-white/5 bg-white/5 p-4">
+              <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-gray-400">
+                Verified Contact
+              </h3>
+              <div className="space-y-2 text-sm text-gray-300">
+                <p>
+                  <span className="text-gray-500">Address:</span>{' '}
+                  {dossier.exactAddress || 'Not verified'}
+                </p>
+                <p>
+                  <span className="text-gray-500">Manager:</span>{' '}
+                  {dossier.managerName || 'Not verified'}
+                </p>
+                <p>
+                  <span className="text-gray-500">Phone:</span>{' '}
+                  {dossier.contactPhone || 'Not verified'}
+                </p>
+                <p>
+                  <span className="text-gray-500">Email:</span>{' '}
+                  {dossier.contactEmail || 'Not verified'}
+                </p>
+                <p>
+                  <span className="text-gray-500">Availability:</span>{' '}
+                  {dossier.availability || 'Ask landlord'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         <div>
           <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-400 flex items-center gap-2 mb-3">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-crosshair"><circle cx="12" cy="12" r="10"/><line x1="22" x2="18" y1="12" y2="12"/><line x1="6" x2="2" y1="12" y2="12"/><line x1="12" x2="12" y1="6" y2="2"/><line x1="12" x2="12" y1="22" y2="18"/></svg>
@@ -92,6 +147,61 @@ export function LeveragePanel({ data, isLoading }: LeveragePanelProps) {
             </p>
           </div>
         </div>
+
+        {dossier && dossier.feesAndPolicies.length > 0 && (
+          <div className="rounded-xl border border-white/5 bg-white/5 p-4">
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+              Fees & Policies
+            </h4>
+            <div className="space-y-2 text-sm text-gray-300">
+              {dossier.feesAndPolicies.map((fact) => (
+                <p key={`${fact.label}-${fact.value}`}>
+                  <span className="text-gray-500">{fact.label}:</span> {fact.value}
+                </p>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {dossier && dossier.notableConcerns.length > 0 && (
+          <div className="rounded-xl border border-amber-500/20 bg-amber-500/10 p-4">
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-amber-200/80">
+              Notable Concerns
+            </h4>
+            <ul className="space-y-2 text-sm text-amber-100">
+              {dossier.notableConcerns.map((concern) => (
+                <li key={concern}>{concern}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {data.sourceLinks.length > 0 && (
+          <div className="rounded-xl border border-white/5 bg-white/5 p-4">
+            <h4 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+              Sources Used
+            </h4>
+            <div className="space-y-2 text-sm text-gray-300">
+              {data.sourceLinks.map((source) => (
+                <a
+                  key={`${source.kind}-${source.url}`}
+                  href={source.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block rounded-lg border border-white/5 bg-black/20 px-3 py-2 transition-colors hover:border-blue-400/30 hover:text-white"
+                >
+                  <span className="font-medium text-blue-200">{source.label}</span>
+                  <span className="ml-2 text-xs uppercase tracking-[0.16em] text-gray-500">
+                    {source.kind}
+                  </span>
+                  {source.note && (
+                    <span className="block mt-1 text-xs text-gray-400">{source.note}</span>
+                  )}
+                </a>
+              ))}
+            </div>
+          </div>
+        )}
 
         {data.contactPhone && (
           <div className="flex items-center gap-3 bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl mt-4">
