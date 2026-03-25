@@ -56,9 +56,9 @@ export default function ProspectPage({ params }: PageProps) {
   if (!currentSession || currentSession.listing.id !== id) {
     return (
       <main className="flex min-h-screen items-center justify-center px-6">
-        <div className="max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 text-center backdrop-blur-md">
-          <h1 className="text-2xl font-semibold text-white">Restoring your session...</h1>
-          <p className="mt-3 text-sm text-gray-400">
+        <div className="max-w-md rounded-3xl border border-slate-200 bg-white shadow-sm p-8 text-center">
+          <h1 className="text-2xl font-semibold text-slate-900">Restoring your session...</h1>
+          <p className="mt-3 text-sm text-slate-500">
             This page depends on the in-browser session. We&apos;re sending you back to
             search so you can pick a property again.
           </p>
@@ -187,13 +187,13 @@ export default function ProspectPage({ params }: PageProps) {
 
   return (
     <main className="min-h-screen overflow-hidden px-6 py-10 md:px-12">
-      <div className="absolute inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.22),_transparent_55%)]" />
-      <div className="absolute -left-24 bottom-0 -z-10 h-80 w-80 rounded-full bg-cyan-500/10 blur-3xl" />
+      <div className="absolute inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(circle_at_top,_rgba(59,130,246,0.1),_transparent_55%)]" />
+      <div className="absolute -left-24 bottom-0 -z-10 h-80 w-80 rounded-full bg-cyan-200/40 blur-3xl" />
 
       <div className="mx-auto max-w-6xl">
         <Link
           href="/results"
-          className="inline-flex items-center gap-2 text-sm font-medium text-blue-300 transition-colors hover:text-white"
+          className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -214,51 +214,51 @@ export default function ProspectPage({ params }: PageProps) {
 
         <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_23rem]">
           <div className="space-y-8">
-            <section className="rounded-[2rem] border border-white/10 bg-white/6 p-7 backdrop-blur-xl">
-              <p className="text-sm font-medium uppercase tracking-[0.25em] text-blue-300/80">
+            <section className="rounded-[2rem] border border-slate-200 bg-white/80 p-7 shadow-sm backdrop-blur-xl">
+              <p className="text-sm font-medium uppercase tracking-[0.25em] text-blue-600">
                 Section 1
               </p>
-              <div className="mt-4 flex flex-col gap-4 border-b border-white/10 pb-6">
+              <div className="mt-4 flex flex-col gap-4 border-b border-slate-200 pb-6">
                 <div className="flex flex-wrap items-start justify-between gap-4">
                   <div>
-                    <h1 className="text-3xl font-semibold tracking-tight text-white md:text-4xl">
+                    <h1 className="text-3xl font-semibold tracking-tight text-slate-900 md:text-4xl">
                       {listing.title}
                     </h1>
-                    <p className="mt-2 text-base text-gray-300">
+                    <p className="mt-2 text-base text-slate-600">
                       {listing.exactAddress ?? listing.location}
                     </p>
                   </div>
-                  <div className="rounded-2xl border border-blue-400/20 bg-blue-500/10 px-4 py-3 text-right">
-                    <p className="text-xs uppercase tracking-[0.2em] text-blue-200/80">
+                  <div className="rounded-2xl border border-blue-200 bg-blue-50 px-4 py-3 text-right">
+                    <p className="text-xs uppercase tracking-[0.2em] text-blue-600">
                       Asking Rent
                     </p>
-                    <p className="mt-1 text-2xl font-semibold text-white">
+                    <p className="mt-1 text-2xl font-semibold text-slate-900">
                       {listing.rent ?? 'Price on request'}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex flex-wrap gap-3 text-sm text-gray-300">
+                <div className="flex flex-wrap gap-3 text-sm text-slate-700">
                   {listing.bedrooms !== null && (
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                    <span className="rounded-full border border-slate-200 bg-white shadow-sm px-3 py-1.5">
                       {listing.bedrooms} bed
                     </span>
                   )}
                   {listing.bathrooms !== null && (
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                    <span className="rounded-full border border-slate-200 bg-white shadow-sm px-3 py-1.5">
                       {listing.bathrooms} bath
                     </span>
                   )}
                   {listing.petPolicy && (
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                    <span className="rounded-full border border-slate-200 bg-white shadow-sm px-3 py-1.5">
                       {listing.petPolicy}
                     </span>
                   )}
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                  <span className="rounded-full border border-slate-200 bg-white shadow-sm px-3 py-1.5">
                     via {listing.sourceSite}
                   </span>
                   {listing.managerName && (
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5">
+                    <span className="rounded-full border border-slate-200 bg-white shadow-sm px-3 py-1.5">
                       {listing.managerName}
                     </span>
                   )}
@@ -269,7 +269,7 @@ export default function ProspectPage({ params }: PageProps) {
                     {displayableAttributes.slice(0, 6).map((attribute) => (
                       <span
                         key={attribute.key}
-                        className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-3 py-1.5 text-sm text-cyan-100"
+                        className="rounded-full border border-cyan-200 bg-cyan-50 px-3 py-1.5 text-sm text-cyan-800"
                       >
                         {attribute.displayText}
                       </span>
@@ -280,38 +280,38 @@ export default function ProspectPage({ params }: PageProps) {
 
               <div className="mt-6 grid gap-6 md:grid-cols-[minmax(0,1fr)_15rem]">
                 <div>
-                  <h2 className="text-lg font-semibold text-white">Property summary</h2>
-                  <p className="mt-3 text-sm leading-7 text-gray-300">
+                  <h2 className="text-lg font-semibold text-slate-900">Property summary</h2>
+                  <p className="mt-3 text-sm leading-7 text-slate-600">
                     {listing.description || 'No listing summary was available from the search.'}
                   </p>
                 </div>
 
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm text-gray-300">
-                  <p className="text-xs uppercase tracking-[0.18em] text-gray-400">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                  <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
                     Listing details
                   </p>
                   <div className="mt-4 space-y-3">
                     <p>
-                      <span className="text-gray-500">Exact address:</span>{' '}
+                      <span className="text-slate-400">Exact address:</span>{' '}
                       {listing.exactAddress ?? 'Using listing location'}
                     </p>
                     <p>
-                      <span className="text-gray-500">Available from:</span>{' '}
+                      <span className="text-slate-400">Available from:</span>{' '}
                       {listing.availableFrom ?? 'Ask landlord'}
                     </p>
                     <p>
-                      <span className="text-gray-500">Phone:</span>{' '}
+                      <span className="text-slate-400">Phone:</span>{' '}
                       {listing.contactPhone ?? 'Will scrape or enter manually'}
                     </p>
                     <p>
-                      <span className="text-gray-500">Manager:</span>{' '}
+                      <span className="text-slate-400">Manager:</span>{' '}
                       {listing.managerName ?? 'Will verify during research'}
                     </p>
                     <a
                       href={listing.listingUrl}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-2 text-blue-300 transition-colors hover:text-white"
+                      className="inline-flex items-center gap-2 text-blue-600 transition-colors hover:text-blue-700"
                     >
                       Open original listing
                       <svg
@@ -334,21 +334,21 @@ export default function ProspectPage({ params }: PageProps) {
               </div>
             </section>
 
-            <section className="rounded-[2rem] border border-white/10 bg-white/6 p-7 backdrop-blur-xl">
-              <p className="text-sm font-medium uppercase tracking-[0.25em] text-blue-300/80">
+            <section className="rounded-[2rem] border border-slate-200 bg-white/80 p-7 shadow-sm backdrop-blur-xl">
+              <p className="text-sm font-medium uppercase tracking-[0.25em] text-blue-600">
                 Section 2
               </p>
               <div className="mt-4 flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-semibold text-white">Your questions</h2>
-                  <p className="mt-2 text-sm text-gray-400">
+                  <h2 className="text-2xl font-semibold text-slate-900">Your questions</h2>
+                  <p className="mt-2 text-sm text-slate-500">
                     Tweak the brief before the agent calls the landlord.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setUserQuestions([...userQuestions, ''])}
-                  className="rounded-full border border-blue-400/20 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 transition-colors hover:bg-blue-500/20 hover:text-white"
+                  className="rounded-full border border-blue-200 bg-blue-50 px-4 py-2 text-sm font-medium text-blue-600 transition-colors hover:bg-blue-100"
                 >
                   Add question
                 </button>
@@ -358,7 +358,7 @@ export default function ProspectPage({ params }: PageProps) {
                 {userQuestions.map((question, index) => (
                   <div
                     key={`${index}-${question}`}
-                    className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/20 p-3"
+                    className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white shadow-sm p-3"
                   >
                     <input
                       type="text"
@@ -366,13 +366,13 @@ export default function ProspectPage({ params }: PageProps) {
                       onChange={(event) =>
                         handleQuestionChange(index, event.target.value)
                       }
-                      className="flex-1 bg-transparent px-2 text-sm text-white outline-none placeholder:text-gray-500"
+                      className="flex-1 bg-transparent px-2 text-sm text-slate-900 outline-none placeholder:text-slate-400"
                       placeholder="Add a question for the landlord"
                     />
                     <button
                       type="button"
                       onClick={() => handleQuestionRemove(index)}
-                      className="rounded-full bg-red-500/10 px-3 py-2 text-xs font-medium text-red-300 transition-colors hover:bg-red-500/20 hover:text-white"
+                      className="rounded-full bg-red-50 px-3 py-2 text-xs font-medium text-red-600 transition-colors hover:bg-red-100"
                     >
                       Remove
                     </button>
@@ -386,19 +386,19 @@ export default function ProspectPage({ params }: PageProps) {
             )}
 
             {scrapeError && (
-              <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+              <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                 {scrapeError}
               </div>
             )}
           </div>
 
           <aside className="space-y-6 lg:sticky lg:top-8 lg:self-start">
-            <section className="rounded-[2rem] border border-white/10 bg-zinc-950/70 p-6 shadow-2xl backdrop-blur-xl">
-              <p className="text-sm font-medium uppercase tracking-[0.25em] text-blue-300/80">
+            <section className="rounded-[2rem] border border-slate-200 bg-white/90 p-6 shadow-xl backdrop-blur-xl">
+              <p className="text-sm font-medium uppercase tracking-[0.25em] text-blue-600">
                 Section 3
               </p>
-              <h2 className="mt-4 text-2xl font-semibold text-white">Launch the call</h2>
-              <p className="mt-3 text-sm leading-6 text-gray-400">
+              <h2 className="mt-4 text-2xl font-semibold text-slate-900">Launch the call</h2>
+              <p className="mt-3 text-sm leading-6 text-slate-500">
                 Research the listing first, then send the voice agent in with the
                 property details, leverage points, and your custom questions.
               </p>
@@ -408,7 +408,7 @@ export default function ProspectPage({ params }: PageProps) {
                   type="button"
                   onClick={handleResearch}
                   disabled={isScrapingDetails}
-                  className="w-full rounded-2xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-2xl bg-blue-600 px-4 py-3.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {isScrapingDetails
                     ? 'Researching listing, comparables, and reputation...'
@@ -417,8 +417,8 @@ export default function ProspectPage({ params }: PageProps) {
                       : 'Research & prepare agent'}
                 </button>
 
-                <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-                  <label className="block text-xs uppercase tracking-[0.18em] text-gray-400">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-inner">
+                  <label className="block text-xs uppercase tracking-[0.18em] text-slate-500">
                     Landlord phone number
                   </label>
                   <input
@@ -426,10 +426,10 @@ export default function ProspectPage({ params }: PageProps) {
                     value={phoneNumber}
                     onChange={(event) => setPhoneNumber(event.target.value)}
                     placeholder="+1 555 123 4567"
-                    className="mt-3 w-full bg-transparent text-sm text-white outline-none placeholder:text-gray-500"
+                    className="mt-3 w-full bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
                   />
                   {!phoneNumber && (
-                    <p className="mt-3 text-xs text-amber-300">
+                    <p className="mt-3 text-xs text-amber-600">
                       No phone number was found yet. You can paste one manually once you
                       have it.
                     </p>
@@ -440,7 +440,7 @@ export default function ProspectPage({ params }: PageProps) {
                   type="button"
                   onClick={handleCall}
                   disabled={!leverageReady || !phoneNumber || isCalling}
-                  className="w-full rounded-2xl bg-indigo-600 px-4 py-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-2xl bg-indigo-600 px-4 py-4 text-sm font-semibold text-white transition-colors hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {callState.status === 'initiating'
                     ? 'Dialing landlord...'
@@ -448,13 +448,13 @@ export default function ProspectPage({ params }: PageProps) {
                 </button>
 
                 {!leverageReady && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-slate-400">
                     Complete the research step before launching the call.
                   </p>
                 )}
 
                 {callError && (
-                  <div className="rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                  <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                     {callError}
                   </div>
                 )}

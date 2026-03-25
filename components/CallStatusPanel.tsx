@@ -90,14 +90,14 @@ export function CallStatusPanel({ onRetry }: CallStatusPanelProps) {
       : 0;
 
   return (
-    <section className="overflow-hidden rounded-[2rem] border border-white/10 bg-zinc-950/75 shadow-2xl backdrop-blur-xl">
+    <section className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl">
       <div
         className={`border-b px-5 py-4 ${
           isComplete
-            ? 'border-emerald-500/20 bg-emerald-500/10'
+            ? 'border-emerald-200 bg-emerald-50'
             : isFailed
-              ? 'border-red-500/20 bg-red-500/10'
-              : 'border-indigo-500/20 bg-indigo-500/10'
+              ? 'border-red-200 bg-red-50'
+              : 'border-indigo-200 bg-indigo-50'
         }`}
       >
         <div className="flex items-center justify-between gap-4">
@@ -105,14 +105,14 @@ export function CallStatusPanel({ onRetry }: CallStatusPanelProps) {
             {isInProgress && (
               <span className="relative flex h-3 w-3">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-indigo-400 opacity-70" />
-                <span className="relative inline-flex h-3 w-3 rounded-full bg-indigo-500" />
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-indigo-600" />
               </span>
             )}
-            {isComplete && <span className="h-3 w-3 rounded-full bg-emerald-400" />}
-            {isFailed && <span className="h-3 w-3 rounded-full bg-red-400" />}
+            {isComplete && <span className="h-3 w-3 rounded-full bg-emerald-500" />}
+            {isFailed && <span className="h-3 w-3 rounded-full bg-red-500" />}
 
             <div>
-              <p className="text-sm font-semibold text-white">
+              <p className="text-sm font-semibold text-slate-900">
                 {callState.status === 'initiating'
                   ? 'Initiating outbound call'
                   : callState.status === 'in-progress'
@@ -121,7 +121,7 @@ export function CallStatusPanel({ onRetry }: CallStatusPanelProps) {
                       ? 'Call completed'
                       : 'Call failed'}
               </p>
-              <p className="text-xs text-gray-300">
+              <p className="text-xs text-slate-600">
                 {isInProgress
                   ? `Elapsed time ${formatElapsed(elapsedSeconds)}`
                   : isComplete
@@ -135,7 +135,7 @@ export function CallStatusPanel({ onRetry }: CallStatusPanelProps) {
             <button
               type="button"
               onClick={onRetry}
-              className="rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-white/20"
+              className="rounded-full border border-slate-200 bg-white shadow-sm px-4 py-2 text-xs font-medium text-slate-700 transition-colors hover:bg-slate-50"
             >
               Retry call
             </button>
@@ -145,60 +145,60 @@ export function CallStatusPanel({ onRetry }: CallStatusPanelProps) {
 
       <div className="space-y-5 p-5">
         {(callState.summary || isComplete) && (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-gray-400">
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
               Call summary
             </p>
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-gray-200">
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-700">
               {callState.summary || 'The call ended, but ElevenLabs has not returned a summary yet.'}
             </p>
           </div>
         )}
 
         {callState.viewingScheduled && (
-          <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-100">
+          <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
             Viewing scheduled: {callState.viewingScheduled}
           </div>
         )}
 
         {questionEntries.length > 0 && (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <p className="text-xs uppercase tracking-[0.18em] text-gray-400">
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
               Questions answered
             </p>
             <div className="mt-4 space-y-3">
               {questionEntries.map(([question, answer]) => (
-                <div key={question} className="rounded-xl bg-black/20 p-3">
-                  <p className="text-xs uppercase tracking-[0.14em] text-gray-500">
+                <div key={question} className="rounded-xl border border-slate-100 bg-slate-50 p-3">
+                  <p className="text-xs uppercase tracking-[0.14em] text-slate-500">
                     {question}
                   </p>
-                  <p className="mt-2 text-sm text-gray-200">{answer}</p>
+                  <p className="mt-2 text-sm text-slate-700">{answer}</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm p-4">
           <div className="flex items-center justify-between gap-3">
-            <p className="text-xs uppercase tracking-[0.18em] text-gray-400">
+            <p className="text-xs uppercase tracking-[0.18em] text-slate-500">
               Transcript
             </p>
             <button
               type="button"
               onClick={() => setShowTranscript((current) => !current)}
-              className="text-xs font-medium text-blue-300 transition-colors hover:text-white"
+              className="text-xs font-medium text-blue-600 transition-colors hover:text-blue-700"
             >
               {showTranscript ? 'Hide transcript' : 'Show transcript'}
             </button>
           </div>
 
           {showTranscript ? (
-            <div className="mt-4 max-h-72 overflow-y-auto rounded-xl bg-black/20 p-4 text-sm leading-6 text-gray-200">
+            <div className="mt-4 max-h-72 overflow-y-auto rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm leading-6 text-slate-700">
               {callState.transcript ? (
                 <pre className="whitespace-pre-wrap font-sans">{callState.transcript}</pre>
               ) : (
-                <p className="text-gray-500">
+                <p className="text-slate-500">
                   {isInProgress
                     ? 'Transcript has not started streaming yet.'
                     : 'No transcript was available for this call.'}
@@ -206,7 +206,7 @@ export function CallStatusPanel({ onRetry }: CallStatusPanelProps) {
               )}
             </div>
           ) : (
-            <p className="mt-3 text-sm text-gray-500">
+            <p className="mt-3 text-sm text-slate-500">
               Expand this section to inspect the full conversation transcript.
             </p>
           )}

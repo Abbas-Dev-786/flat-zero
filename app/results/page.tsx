@@ -13,14 +13,14 @@ const SEARCH_DEADLINE_MS = 90_000;
 
 function LoadingCard() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md">
-      <div className="h-48 animate-pulse bg-white/10" />
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="h-48 animate-pulse bg-slate-100" />
       <div className="space-y-4 p-6">
-        <div className="h-7 w-1/2 animate-pulse rounded bg-white/10" />
-        <div className="h-5 w-3/4 animate-pulse rounded bg-white/10" />
-        <div className="h-4 w-full animate-pulse rounded bg-white/10" />
-        <div className="h-4 w-5/6 animate-pulse rounded bg-white/10" />
-        <div className="h-11 w-full animate-pulse rounded-xl bg-blue-500/20" />
+        <div className="h-7 w-1/2 animate-pulse rounded bg-slate-200" />
+        <div className="h-5 w-3/4 animate-pulse rounded bg-slate-100" />
+        <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
+        <div className="h-4 w-5/6 animate-pulse rounded bg-slate-100" />
+        <div className="h-11 w-full animate-pulse rounded-xl bg-slate-200" />
       </div>
     </div>
   );
@@ -181,14 +181,14 @@ export default function ResultsPage() {
 
   return (
     <main className="relative min-h-screen p-6 md:p-12">
-      <div className="absolute top-0 right-0 -z-10 h-[800px] w-[800px] rounded-full bg-blue-500/10 blur-[120px]" />
+      <div className="absolute top-0 right-0 -z-10 h-[800px] w-[800px] rounded-full bg-blue-300/30 blur-[120px]" />
 
       <div className="mx-auto max-w-7xl">
         <div className="mb-10 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <Link
               href="/"
-              className="mb-4 inline-flex items-center text-sm font-medium text-blue-400 transition-colors hover:text-blue-300"
+              className="mb-4 inline-flex items-center text-sm font-medium text-blue-600 transition-colors hover:text-blue-700"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -207,22 +207,22 @@ export default function ResultsPage() {
               </svg>
               Back to search
             </Link>
-            <h1 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 md:text-5xl">
               Found {listings.length} verified matches
             </h1>
-            <p className="mt-2 text-lg text-gray-400">
+            <p className="mt-2 text-lg text-slate-600">
               for &ldquo;{searchCriteria.query}&rdquo;{' '}
               {searchCriteria.location && `in ${searchCriteria.location}`}
             </p>
             {searchStatusMessage && (
-              <p className="mt-3 text-sm text-blue-200/80">{searchStatusMessage}</p>
+              <p className="mt-3 text-sm font-medium text-blue-600">{searchStatusMessage}</p>
             )}
             {searchCriteria.preferences.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {searchCriteria.preferences.map((preference) => (
                   <span
                     key={preference.key}
-                    className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-sm text-blue-100"
+                    className="rounded-full border border-slate-200 bg-white shadow-sm px-3 py-1.5 text-sm text-slate-700"
                   >
                     {formatSearchPreference(preference)}
                   </span>
@@ -233,13 +233,13 @@ export default function ResultsPage() {
         </div>
 
         {searchError && (
-          <div className="mb-6 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
             {searchError}
           </div>
         )}
 
         {listings.length === 0 && !isSearching ? (
-          <div className="flex flex-col items-center justify-center rounded-3xl border border-white/10 bg-white/5 py-20 text-center backdrop-blur-md">
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-slate-200 bg-white shadow-sm py-20 text-center">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="48"
@@ -250,15 +250,15 @@ export default function ResultsPage() {
               strokeWidth="1"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="mb-4 text-gray-500"
+              className="mb-4 text-slate-300"
             >
               <path d="m13.5 8.5-5 5" />
               <path d="m8.5 8.5 5 5" />
               <circle cx="11" cy="11" r="8" />
               <path d="m21 21-4.3-4.3" />
             </svg>
-            <h3 className="text-xl font-semibold text-gray-200">No verified properties found</h3>
-            <p className="mt-2 max-w-sm text-gray-400">
+            <h3 className="text-xl font-semibold text-slate-900">No verified properties found</h3>
+            <p className="mt-2 max-w-sm text-slate-500">
               We filtered out generic search and category pages, so try broadening the
               query or changing the location.
             </p>
