@@ -1598,6 +1598,14 @@ export function extractPhoneNumber(value: string | null | undefined) {
     return null;
   }
 
+  const telMatch = value.match(/\]\(tel:([^)]+)\)/i);
+  if (telMatch) {
+    const telNumber = telMatch[1].trim();
+    if (telNumber.replace(/\D/g, '').length >= 10) {
+      return telNumber;
+    }
+  }
+
   const candidates = value.match(/\+?\d[\d\s().-]{7,}\d/g) ?? [];
 
   for (const candidate of candidates) {

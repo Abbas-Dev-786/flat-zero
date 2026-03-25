@@ -42,15 +42,14 @@ export default function ProspectPage({ params }: PageProps) {
 
   useEffect(() => {
     const prefilledPhone =
-      currentSession?.leverageData?.contactPhone ?? currentSession?.listing.contactPhone ?? '';
+      currentSession?.leverageData?.contactPhone ?? currentSession?.listing?.contactPhone ?? '';
 
-    if (prefilledPhone && !phoneNumber) {
-      setPhoneNumber(prefilledPhone);
+    if (prefilledPhone) {
+      setPhoneNumber((prev) => prev || prefilledPhone);
     }
   }, [
     currentSession?.leverageData?.contactPhone,
-    currentSession?.listing.contactPhone,
-    phoneNumber,
+    currentSession?.listing?.contactPhone,
   ]);
 
   if (!currentSession || currentSession.listing.id !== id) {

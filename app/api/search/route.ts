@@ -24,7 +24,11 @@ export async function POST(request: Request) {
     const stream = new ReadableStream<Uint8Array>({
       start(controller) {
         const send = (event: SearchStreamEvent) => {
-          controller.enqueue(encodeEvent(event));
+          try {
+            controller.enqueue(encodeEvent(event));
+          } catch (e) {
+            // Stream might be closed if client disconnected
+          }
         };
 
         void (async () => {
@@ -47,7 +51,11 @@ export async function POST(request: Request) {
                   : 'Unable to search listings right now',
             });
           } finally {
-            controller.close();
+            try {
+              controller.close();
+            } catch (e) {
+              // Ignore if already closed
+            }
           }
         })();
       },
